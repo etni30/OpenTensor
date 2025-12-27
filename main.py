@@ -38,13 +38,11 @@ if __name__ == '__main__':
     S_size = kwargs["env"]["S_size"]
     T = kwargs["env"]["T"]    
     if mode == "generate_data":
-        trainer.generate_synthetic_examples(samples_n=100,
-                                            save_path="./data/100000_S%dT%d_scalar3_filtered.npy" % (S_size, T))
+        trainer.generate_synthetic_examples(save_path="./data/size_%d_rank_%d_synthetic_data.npy" % (S_size, T))
 
     elif mode == "train":
         trainer.learn(resume=resume,
-                      example_path="./data/100000_S%dT%d_scalar3_filtered.npy" % (S_size, T),
-                      self_example_path=None)    
+                      example_path="./data/size_%d_rank_%d_synthetic_data.npy" % (S_size, T))
         
     elif mode == "infer":
         self_play_net = Net(**kwargs["net"])
