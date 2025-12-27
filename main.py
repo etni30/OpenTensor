@@ -38,7 +38,7 @@ if __name__ == '__main__':
     S_size = kwargs["env"]["S_size"]
     T = kwargs["env"]["T"]    
     if mode == "generate_data":
-        trainer.generate_synthetic_examples(samples_n=100000,
+        trainer.generate_synthetic_examples(samples_n=100,
                                             save_path="./data/100000_S%dT%d_scalar3_filtered.npy" % (S_size, T))
 
     elif mode == "train":
