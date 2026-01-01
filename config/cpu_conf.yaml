@@ -9,16 +9,16 @@ trainer:
   exp_name: "selfplay"
   device: "cpu"  
   self_play_device: "cpu"
-  lr: 0.0001
-  iters_n: 150
-  batch_size: 4
-  a_weight: .5
-  v_weight: .5
+  lr: 0.0001 # modify
+  iters_n: 150 # modify
+  batch_size: 4 # modify
+  a_weight: .5 # modify
+  v_weight: .5 # modify
   save_freq: 50
   val_freq: 50
   temp_save_freq: 50
   self_play_buffer: 100
-  self_play_freq: 5
+  self_play_freq: 5 # modify
   grad_clip: 4.0
 
 net:

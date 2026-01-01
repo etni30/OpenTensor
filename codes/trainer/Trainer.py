@@ -259,9 +259,6 @@ class Trainer():
               self_example_path=None,
               save_type="traj",
               self_play=False):
-        '''
-        训练的主函数
-        '''
         optimizer_a = self.optimizer_a
         scheduler_a = self.scheduler_a
         optimizer_v = self.optimizer_v
@@ -318,10 +315,8 @@ class Trainer():
         
         for i in tqdm(range(old_iter, self.iters_n)):
             
-            # 2. self-play for data.
-            # if i % self_play_freq == 0:
-            #     self.self_examples.extend(self.play(200 if i < 50000 else 800))
-
+            # TODO (implement self-play data generation).
+            
             try:
                 batch_example = next(loader)
             except StopIteration:
