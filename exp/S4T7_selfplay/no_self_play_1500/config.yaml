@@ -1,0 +1,52 @@
+env:
+  R_limit: 8
+  S_size: 4
+  T: 7
+mcts:
+  R_limit: 8
+  simulate_times: 1
+net:
+  N_features: 64
+  N_heads: 32
+  N_samples: 32
+  N_steps: 3
+  S_size: 4
+  T: 7
+  channel: 3
+  coefficients:
+  - 0
+  - 1
+  - -1
+  device: cuda:0
+  inter_channel: 512
+  n_attentive: 6
+  out_channel: 8
+  policy_layers: 2
+  scalar_size: 3
+  value_layers: 3
+trainer:
+  S_size: 4
+  T: 7
+  a_weight: 0.5
+  batch_size: 256
+  coefficients:
+  - 0
+  - 1
+  - -1
+  device: cuda:0
+  exp_dir: exp
+  exp_name: S4T7_selfplay
+  gamma: 0.1
+  grad_clip: 4.0
+  iters_n: 1500
+  lr: 0.0001
+  save_freq: 500
+  self_play_buffer: 10000
+  self_play_device: cuda:0
+  self_play_freq: 500
+  step_size: 500
+  synthetic_samples_n: 10000
+  temp_save_freq: 500
+  v_weight: 0.5
+  val_freq: 1000
+  weight_decay: 1.0e-05
