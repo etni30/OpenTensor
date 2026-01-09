@@ -1,2 +1,5 @@
 /exp/
 *.pyc
+*.log
+codes/dataset/__pycache__/
+__pycache__/

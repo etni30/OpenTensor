@@ -38,11 +38,12 @@ if __name__ == '__main__':
     S_size = kwargs["env"]["S_size"]
     T = kwargs["env"]["T"]    
     if mode == "generate_data":
-        trainer.generate_synthetic_examples(save_path="./data/size_%d_rank_%d_synthetic_data.npy" % (S_size, T))
+        trainer.generate_synthetic_examples(save_path="/home/etnih/MatrixMul/OpenTensor/data/size_4_rank_7_synthetic_data.npy")
 
     elif mode == "train":
         trainer.learn(resume=resume,
-                      example_path="./data/size_%d_rank_%d_synthetic_data.npy" % (S_size, T))
+                      example_path="/home/etnih/MatrixMul/OpenTensor/data/size_4_rank_7_synthetic_data.npy",
+                      self_play=True)
         
     elif mode == "infer":
         self_play_net = Net(**kwargs["net"])

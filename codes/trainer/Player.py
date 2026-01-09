@@ -16,10 +16,10 @@ class Player():
     def __init__(self,
                  net, env, mcts,
                  exp_dir,
-                 simu_times=100,
+                 simu_times=25,
                  play_times=1,
-                 num_workers=256,
-                 device="cuda:1",
+                 num_workers=64,
+                 device="cuda:0",
                  noise=False):
         
         self.net = net

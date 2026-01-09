@@ -5,45 +5,33 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Open Tensor - Generate Data",
+            "name": "Python Debugger: Open Tensor - Synthetic Data",
             "type": "debugpy",
-            "cwd": "${workspaceFolder}",
             "request": "launch",
-            "program": "${workspaceFolder}\\main.py",
+            "program": "/home/etnih/MatrixMul/OpenTensor/main.py",
+            "cwd": "/home/etnih/MatrixMul/OpenTensor/",
             "console": "integratedTerminal",
+            "python": "/home/etnih/miniconda3/envs/open_tensor/bin/python",
             "args": [
                 "--mode",
                 "generate_data",
                 "--config",
-                "./config/cpu_conf.yaml"
-            ]        
+                "/home/etnih/MatrixMul/OpenTensor/config/S_4_gpu_debug.yaml"
+            ]
         },
         {
-            "name": "Open Tensor - Train",
+            "name": "Python Debugger: Open Tensor - Train",
             "type": "debugpy",
-            "cwd": "${workspaceFolder}",
             "request": "launch",
-            "program": "${workspaceFolder}\\main.py",
+            "program": "/home/etnih/MatrixMul/OpenTensor/main.py",
+            "cwd": "/home/etnih/MatrixMul/OpenTensor/",
             "console": "integratedTerminal",
+            "python": "/home/etnih/miniconda3/envs/open_tensor/bin/python",
             "args": [
                 "--mode",
                 "train",
                 "--config",
-                "./config/cpu_conf.yaml"
-            ]
-        },
-        {
-            "name": "Open Tensor - Inference",
-            "type": "debugpy",
-            "cwd": "${workspaceFolder}",
-            "request": "launch",
-            "program": "${workspaceFolder}\\main.py",
-            "console": "integratedTerminal",
-            "args": [
-                "--mode",
-                "infer",
-                "--config",
-                "./config/cpu_conf.yaml"
+                "/home/etnih/MatrixMul/OpenTensor/config/S_4_gpu_debug.yaml"
             ]
         }
     ]
