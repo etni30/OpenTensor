@@ -4,7 +4,6 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join("..")))
 sys.path.append(os.path.abspath(os.path.join(".")))
-from codes.trainer.loss import QuantileLoss
 from codes.env import *
 from codes.mcts import *
 from codes.utils import *
@@ -17,10 +16,10 @@ class Player():
     def __init__(self,
                  net, env, mcts,
                  exp_dir,
-                 simu_times=400,
-                 play_times=10,
-                 num_workers=256,
-                 device="cuda:1",
+                 simu_times=25,
+                 play_times=1,
+                 num_workers=64,
+                 device="cuda:0",
                  noise=False):
         
         self.net = net
@@ -148,15 +147,6 @@ class Player():
         self.call_ct += 1
             
         return results, one_traj   
-    
-    
-    def run(self):
-        
-        self.play(warm_up=True)
-        while True:
-            self.play()
-            print("Finish playing!")
-            
             
     def load_model(self, ckpt_path, only_weight=False, to_device="cuda:0"):
         ckpt = torch.load(ckpt_path)

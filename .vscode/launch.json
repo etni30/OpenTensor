@@ -1,0 +1,38 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Open Tensor - Synthetic Data",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home/etnih/MatrixMul/OpenTensor/main.py",
+            "cwd": "/home/etnih/MatrixMul/OpenTensor/",
+            "console": "integratedTerminal",
+            "python": "/home/etnih/miniconda3/envs/open_tensor/bin/python",
+            "args": [
+                "--mode",
+                "generate_data",
+                "--config",
+                "/home/etnih/MatrixMul/OpenTensor/config/S_4_gpu_debug.yaml"
+            ]
+        },
+        {
+            "name": "Python Debugger: Open Tensor - Train",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home/etnih/MatrixMul/OpenTensor/main.py",
+            "cwd": "/home/etnih/MatrixMul/OpenTensor/",
+            "console": "integratedTerminal",
+            "python": "/home/etnih/miniconda3/envs/open_tensor/bin/python",
+            "args": [
+                "--mode",
+                "train",
+                "--config",
+                "/home/etnih/MatrixMul/OpenTensor/config/S_4_gpu_debug.yaml"
+            ]
+        }
+    ]
+}

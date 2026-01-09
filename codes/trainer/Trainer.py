@@ -22,36 +22,34 @@ from codes.dataset import *
 from codes.multi_runner import *
 
 class Trainer():
-    '''
-    用于训练网络
-    '''
     
     def __init__(self,
-                 net: Net,
-                 env: Environment,
-                 mcts: MCTS,
-                 S_size=4,
-                 T=7,
-                 coefficients=[0, 1, -1],
-                 batch_size=1024,
-                 iters_n=50000,
-                 exp_dir="exp",
-                 exp_name="debug",
-                 device="cuda:0",
-                 self_play_device="cuda:1",
-                 lr=5e-3,
-                 weight_decay=1e-5,
-                 step_size=40000,
-                 gamma=.1,
-                 a_weight=.5,
-                 v_weight=.5,
-                 save_freq=10000,
-                 temp_save_freq=2500,
-                 self_play_freq=10,
-                 self_play_buffer=100000,
-                 grad_clip=4.0,
-                 val_freq=2000,
-                 all_kwargs=None):
+                 net: Net,                 # The neural network architecture (Policy and Value heads)
+                 env: Environment,         # The matrix decomposition environment/state logic
+                 mcts: MCTS,                # The Monte Carlo Tree Search algorithm for move exploration
+                 S_size=4,                 # Dimension of the square matrices (e.g., 4x4)
+                 T=7,                      # The target rank (maximum moves allowed to solve the tensor)
+                 coefficients=[0, 1, -1],  # The set of allowed scalar values for the decomposition
+                 batch_size=1024,          # Number of training samples per optimization step
+                 iters_n=50000,            # Total number of training iterations to perform
+                 exp_dir="exp",            # Directory path for saving experiment results
+                 exp_name="debug",         # Unique name for this specific training session
+                 device="cuda:0",          # GPU/CPU for the primary network training updates
+                 self_play_device="cuda:0",# Dedicated device for running MCTS self-play simulations
+                 lr=5e-3,                  # Learning rate for the optimizer
+                 weight_decay=1e-5,        # L2 regularization factor to improve generalization
+                 step_size=40000,          # Number of iterations between learning rate decays
+                 gamma=.1,                 # Factor by which the learning rate is multiplied every step_size
+                 a_weight=.5,              # Multiplier for the policy (action) loss component
+                 v_weight=.5,              # Multiplier for the value (reward) loss component
+                 save_freq=10000,          # Iteration interval for saving long-term model weights
+                 temp_save_freq=2500,      # Iteration interval for saving latest "last" weights
+                 self_play_freq=10,        # Frequency (in iterations) of generating new self-play data
+                 self_play_buffer=100000,  # Maximum number of state-action pairs held in replay memory
+                 grad_clip=4.0,            # Maximum norm allowed for gradients to ensure stability
+                 val_freq=50,              # Iteration interval for running validation/testing
+                 synthetic_samples_n=150,  # Number of synthetic examples to generate per data generation call
+                 all_kwargs=None):         # Dictionary containing all initialization arguments for logging
         '''
         初始化一个Trainer.
         包含net, env和MCTS
@@ -66,10 +64,10 @@ class Trainer():
         self.self_examples = []
         self.synthetic_examples = []
         
-        self.entropy_loss = torch.nn.CrossEntropyLoss()
-        self.quantile_loss = QuantileLoss()
-        self.a_weight = a_weight
-        self.v_weight = v_weight
+        self.entropy_loss = torch.nn.CrossEntropyLoss() # policy head
+        self.quantile_loss = QuantileLoss(device=device) # value head
+        self.a_weight = a_weight # policy head
+        self.v_weight = v_weight # value head
         
         self.optimizer_a = torch.optim.AdamW(net.parameters(),
                                              weight_decay=weight_decay,
@@ -100,20 +98,18 @@ class Trainer():
         
         self.device = device
         self.self_play_device = self_play_device
+        
+        self.synthetic_samples_n = synthetic_samples_n
+
         self.net.to(device)
         self.all_kwargs = all_kwargs
     
     
     def generate_synthetic_examples(self,
                                     prob=[.8, .1, .1],
-                                    samples_n=10000,
                                     R_limit=12,
                                     save_path=None,
                                     save_type="traj") -> list:
-        '''
-        生成人工合成的Tensor examples
-        返回: results
-        '''
         assert save_type in ["traj", "tuple"]
         
         S_size = self.S_size
@@ -121,7 +117,7 @@ class Trainer():
         T = self.T
         
         total_results = []
-        for _ in tqdm(range(samples_n)):
+        for _ in tqdm(range(self.synthetic_samples_n)):
             R = random.randint(1, R_limit)
             for _ in range(10000):
                 sample = np.zeros((S_size, S_size, S_size), dtype=np.int32)
@@ -263,9 +259,6 @@ class Trainer():
               self_example_path=None,
               save_type="traj",
               self_play=False):
-        '''
-        训练的主函数
-        '''
         optimizer_a = self.optimizer_a
         scheduler_a = self.scheduler_a
         optimizer_v = self.optimizer_v
@@ -299,6 +292,19 @@ class Trainer():
         # Save ckpt.
         ckpt_name = "latest.pth"
         self.save_model(ckpt_name, old_iter)
+
+        player = None
+        if self_play:
+            # Player moves its net to self_play_device in __init__
+            sp_net = copy.deepcopy(self.net)
+            player = Player(
+                net=sp_net,
+                env=self.env,
+                mcts=self.mcts,
+                exp_dir=self.save_dir,            # Player reads ckpt/latest.pth and writes data/self_data.npy here
+                device=self.self_play_device,
+                noise=True
+            )
         
         # 1. Get synthetic examples.
         if example_path is not None:
@@ -321,30 +327,30 @@ class Trainer():
         epoch_ct = 0
         
         for i in tqdm(range(old_iter, self.iters_n)):
-            
-            # 2. self-play for data.
-            # if i % self_play_freq == 0:
-            #     self.self_examples.extend(self.play(200 if i < 50000 else 800))
-
             try:
                 batch_example = next(loader)
             except StopIteration:
                 dataloader.dataset._permutate_traj()
                 if self_play:
+                    try:
+                        player.play()
+                    except Exception as e:
+                        print(f"[Self-play] failed at iter={i}: {e}")
                     self_examples = self.get_self_examples()   # New self-play data.
+                    
                     if self_examples is not None:
                         print("Detect new self-data!")
                         self.self_examples.extend(self_examples)
                         self.self_examples = self.self_examples[-self_play_buffer:]
                         np.save(os.path.join(self.data_dir, "total_self_data.npy"), np.array(self.self_examples, dtype=object))  # Whole buffer.
-                        synthetic_examples_n = 2000 if i > 50000 else 100000
+                        synthetic_examples_n = 5000 if i > (self.iters_n/2) else 10000
                         dataset = TupleDataset(T=self.T,
                                             S_size=self.S_size,
                                             N_steps=self.net.N_steps,
                                             coefficients=self.coefficients,
                                             self_data=self.self_examples,
                                             synthetic_data=random.sample(self.synthetic_examples, synthetic_examples_n))
-                        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0)  
+                        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0)
                     else:                  
                         print("No detect new self-data...")
                     
@@ -352,9 +358,7 @@ class Trainer():
                 batch_example = next(loader)
                 print("Epoch: %d finish." % epoch_ct)
                 epoch_ct += 1
-
-            # 此处进行多进程优化
-            # todo: 什么时候更新网络参数                     
+                 
             optimizer_a.zero_grad()
             optimizer_v.zero_grad()
             loss, v_loss, a_loss = self.learn_one_batch(batch_example)

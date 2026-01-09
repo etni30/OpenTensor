@@ -1,14 +1,3 @@
-# base:
-#   S_size: 4
-#   T: 5
-#   coefficients: 
-#     - 0
-#     - 1
-#     - -1
-#   exp_dir: "exp"
-#   exp_name: "debug"
-#   device: "cuda"
-
 trainer:
   T: 7
   S_size: 4
@@ -19,21 +8,21 @@ trainer:
   exp_dir: "exp"
   exp_name: "S4T7_selfplay"
   device: "cuda:0"  
-  self_play_device: "cuda:1"
+  self_play_device: "cuda:0"
   lr: 0.0001
   weight_decay: 0.00001
-  gamma: .1
-  step_size: 10000000
-  iters_n: 3000000
-  batch_size: 1024
-  a_weight: .1
-  v_weight: .9
-  save_freq: 25000
-  temp_save_freq: 2500
+  gamma: .5
+  step_size: 5000
+  iters_n: 1500
+  batch_size: 256
+  a_weight: .5
+  v_weight: .5
+  save_freq: 500
+  temp_save_freq: 500
   self_play_buffer: 10000
-  self_play_freq: 25
   grad_clip: 4.0
   val_freq: 1000
+  synthetic_samples_n: 10000
 
 net:
   T: 7
@@ -53,11 +42,11 @@ net:
   scalar_size: 3
   policy_layers: 2
   value_layers: 3
-  inter_channel: 512
+  inter_channel: 256
   out_channel: 8
 
 mcts:
-  simulate_times: 400
+  simulate_times: 1
   R_limit: 8
 
 env:

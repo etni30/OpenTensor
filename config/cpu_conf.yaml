@@ -1,0 +1,52 @@
+trainer:
+  T: 7
+  S_size: 4
+  coefficients: 
+    - 0
+    - 1
+    - -1  
+  exp_dir: "exp"
+  exp_name: "selfplay"
+  device: "cpu"  
+  self_play_device: "cpu"
+  lr: 0.0001 # modify
+  iters_n: 150 # modify
+  batch_size: 4 # modify
+  a_weight: .5 # modify
+  v_weight: .5 # modify
+  save_freq: 50
+  val_freq: 50
+  temp_save_freq: 50
+  self_play_buffer: 100
+  self_play_freq: 5 # modify
+  grad_clip: 4.0
+
+net:
+  T: 7
+  S_size: 4
+  coefficients: 
+    - 0
+    - 1
+    - -1
+  device: 'cpu'
+
+  N_steps: 3
+  N_samples: 16
+  n_attentive: 4
+  N_heads: 8
+  N_features: 32
+  channel: 3
+  scalar_size: 3
+  policy_layers: 2
+  value_layers: 3
+  inter_channel: 512
+  out_channel: 8
+
+mcts:
+  simulate_times: 10
+  R_limit: 8
+
+env:
+  R_limit: 8
+  T: 7
+  S_size: 4

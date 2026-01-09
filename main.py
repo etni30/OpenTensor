@@ -11,7 +11,7 @@ def parse():
     parser.add_argument('--config', type=str, default="./config/S_4.yaml")
     parser.add_argument('--mode', type=str, default="train", help="three modes: [generate_data, train, infer]")
     parser.add_argument('--resume', default=None, help="resume ckpt path")
-    parser.add_argument('--run_dir', default="./exp/S4T7_selfplay/1685590684", help="The run dir to infer")
+    parser.add_argument('--run_dir', default="./exp/selfplay/infer", help="The run dir to infer")
     args = parser.parse_args()
     return args
 
@@ -38,13 +38,12 @@ if __name__ == '__main__':
     S_size = kwargs["env"]["S_size"]
     T = kwargs["env"]["T"]    
     if mode == "generate_data":
-        trainer.generate_synthetic_examples(samples_n=100000,
-                                            save_path="./data/100000_S%dT%d_scalar3_filtered.npy" % (S_size, T))
+        trainer.generate_synthetic_examples(save_path="/home/etnih/MatrixMul/OpenTensor/data/size_4_rank_7_synthetic_data.npy")
 
     elif mode == "train":
         trainer.learn(resume=resume,
-                      example_path="./data/100000_S%dT%d_scalar3_filtered.npy" % (S_size, T),
-                      self_example_path=None)    
+                      example_path="/home/etnih/MatrixMul/OpenTensor/data/size_4_rank_7_synthetic_data.npy",
+                      self_play=True)
         
     elif mode == "infer":
         self_play_net = Net(**kwargs["net"])
@@ -52,9 +51,9 @@ if __name__ == '__main__':
                         env=env,
                         mcts=mcts,
                         exp_dir=args.run_dir,
-                        simu_times=800,
+                        simu_times=100,
                         play_times=1,
                         num_workers=64,
-                        device="cuda:0",
+                        device="cpu",
                         noise=True)
-        player.run()     # Running forever...                
+        player.play()     # Running forever...
